@@ -66,5 +66,271 @@
     "2026-06-13",
     "2026-06-14",
     "2026-06-15"
+  ],
+  "snapshots": [
+    {
+      "date": "2026-04-10",
+      "file": "data/fanqie_female_new_ranks_20260410.json"
+    },
+    {
+      "date": "2026-04-11",
+      "file": "data/fanqie_female_new_ranks_20260411.json"
+    },
+    {
+      "date": "2026-04-12",
+      "file": "data/fanqie_female_new_ranks_20260412.json"
+    },
+    {
+      "date": "2026-04-13",
+      "file": "data/fanqie_female_new_ranks_20260413.json"
+    },
+    {
+      "date": "2026-04-14",
+      "file": "data/fanqie_female_new_ranks_20260414.json"
+    },
+    {
+      "date": "2026-04-15",
+      "file": "data/fanqie_female_new_ranks_20260415.json"
+    },
+    {
+      "date": "2026-04-16",
+      "file": "data/fanqie_female_new_ranks_20260416.json"
+    },
+    {
+      "date": "2026-04-17",
+      "file": "data/fanqie_female_new_ranks_20260417.json"
+    },
+    {
+      "date": "2026-04-18",
+      "file": "data/fanqie_female_new_ranks_20260418.json"
+    },
+    {
+      "date": "2026-04-19",
+      "file": "data/fanqie_female_new_ranks_20260419.json"
+    },
+    {
+      "date": "2026-04-20",
+      "file": "data/fanqie_female_new_ranks_20260420.json"
+    },
+    {
+      "date": "2026-04-21",
+      "file": "data/fanqie_female_new_ranks_20260421.json"
+    },
+    {
+      "date": "2026-04-22",
+      "file": "data/fanqie_female_new_ranks_20260422.json"
+    },
+    {
+      "date": "2026-04-23",
+      "file": "data/fanqie_female_new_ranks_20260423.json"
+    },
+    {
+      "date": "2026-04-24",
+      "file": "data/fanqie_female_new_ranks_20260424.json"
+    },
+    {
+      "date": "2026-04-25",
+      "file": "data/fanqie_female_new_ranks_20260425.json"
+    },
+    {
+      "date": "2026-04-26",
+      "file": "data/fanqie_female_new_ranks_20260426.json"
+    },
+    {
+      "date": "2026-04-27",
+      "file": "data/fanqie_female_new_ranks_20260427.json"
+    },
+    {
+      "date": "2026-04-28",
+      "file": "data/fanqie_female_new_ranks_20260428.json"
+    },
+    {
+      "date": "2026-04-29",
+      "file": "data/fanqie_female_new_ranks_20260429.json"
+    },
+    {
+      "date": "2026-04-30",
+      "file": "data/fanqie_female_new_ranks_20260430.json"
+    },
+    {
+      "date": "2026-05-01",
+      "file": "data/fanqie_female_new_ranks_20260501.json"
+    },
+    {
+      "date": "2026-05-02",
+      "file": "data/fanqie_female_new_ranks_20260502.json"
+    },
+    {
+      "date": "2026-05-03",
+      "file": "data/fanqie_female_new_ranks_20260503.json"
+    },
+    {
+      "date": "2026-05-04",
+      "file": "data/fanqie_female_new_ranks_20260504.json"
+    },
+    {
+      "date": "2026-05-06",
+      "file": "data/fanqie_female_new_ranks_20260506.json"
+    },
+    {
+      "date": "2026-05-07",
+      "file": "data/fanqie_female_new_ranks_20260507.json"
+    },
+    {
+      "date": "2026-05-08",
+      "file": "data/fanqie_female_new_ranks_20260508.json"
+    },
+    {
+      "date": "2026-05-09",
+      "file": "data/fanqie_female_new_ranks_20260509.json"
+    },
+    {
+      "date": "2026-05-10",
+      "file": "data/fanqie_female_new_ranks_20260510.json"
+    },
+    {
+      "date": "2026-05-11",
+      "file": "data/fanqie_female_new_ranks_20260511.json"
+    },
+    {
+      "date": "2026-05-12",
+      "file": "data/fanqie_female_new_ranks_20260512.json"
+    },
+    {
+      "date": "2026-05-13",
+      "file": "data/fanqie_female_new_ranks_20260513.json"
+    },
+    {
+      "date": "2026-05-14",
+      "file": "data/fanqie_female_new_ranks_20260514.json"
+    },
+    {
+      "date": "2026-05-15",
+      "file": "data/fanqie_female_new_ranks_20260515.json"
+    },
+    {
+      "date": "2026-05-16",
+      "file": "data/fanqie_female_new_ranks_20260516.json"
+    },
+    {
+      "date": "2026-05-17",
+      "file": "data/fanqie_female_new_ranks_20260517.json"
+    },
+    {
+      "date": "2026-05-18",
+      "file": "data/fanqie_female_new_ranks_20260518.json"
+    },
+    {
+      "date": "2026-05-19",
+      "file": "data/fanqie_female_new_ranks_20260519.json"
+    },
+    {
+      "date": "2026-05-20",
+      "file": "data/fanqie_female_new_ranks_20260520.json"
+    },
+    {
+      "date": "2026-05-21",
+      "file": "data/fanqie_female_new_ranks_20260521.json"
+    },
+    {
+      "date": "2026-05-22",
+      "file": "data/fanqie_female_new_ranks_20260522.json"
+    },
+    {
+      "date": "2026-05-23",
+      "file": "data/fanqie_female_new_ranks_20260523.json"
+    },
+    {
+      "date": "2026-05-24",
+      "file": "data/fanqie_female_new_ranks_20260524.json"
+    },
+    {
+      "date": "2026-05-25",
+      "file": "data/fanqie_female_new_ranks_20260525.json"
+    },
+    {
+      "date": "2026-05-26",
+      "file": "data/fanqie_female_new_ranks_20260526.json"
+    },
+    {
+      "date": "2026-05-27",
+      "file": "data/fanqie_female_new_ranks_20260527.json"
+    },
+    {
+      "date": "2026-05-28",
+      "file": "data/fanqie_female_new_ranks_20260528.json"
+    },
+    {
+      "date": "2026-05-29",
+      "file": "data/fanqie_female_new_ranks_20260529.json"
+    },
+    {
+      "date": "2026-05-30",
+      "file": "data/fanqie_female_new_ranks_20260530.json"
+    },
+    {
+      "date": "2026-05-31",
+      "file": "data/fanqie_female_new_ranks_20260531.json"
+    },
+    {
+      "date": "2026-06-01",
+      "file": "data/fanqie_female_new_ranks_20260601.json"
+    },
+    {
+      "date": "2026-06-02",
+      "file": "data/fanqie_female_new_ranks_20260602.json"
+    },
+    {
+      "date": "2026-06-03",
+      "file": "data/fanqie_female_new_ranks_20260603.json"
+    },
+    {
+      "date": "2026-06-04",
+      "file": "data/fanqie_female_new_ranks_20260604.json"
+    },
+    {
+      "date": "2026-06-05",
+      "file": "data/fanqie_female_new_ranks_20260605.json"
+    },
+    {
+      "date": "2026-06-06",
+      "file": "data/fanqie_female_new_ranks_20260606.json"
+    },
+    {
+      "date": "2026-06-07",
+      "file": "data/fanqie_female_new_ranks_20260607.json"
+    },
+    {
+      "date": "2026-06-08",
+      "file": "data/fanqie_female_new_ranks_20260608.json"
+    },
+    {
+      "date": "2026-06-09",
+      "file": "data/fanqie_female_new_ranks_20260609.json"
+    },
+    {
+      "date": "2026-06-10",
+      "file": "data/fanqie_female_new_ranks_20260610.json"
+    },
+    {
+      "date": "2026-06-11",
+      "file": "data/fanqie_female_new_ranks_20260611.json"
+    },
+    {
+      "date": "2026-06-12",
+      "file": "data/fanqie_female_new_ranks_20260612.json"
+    },
+    {
+      "date": "2026-06-13",
+      "file": "data/fanqie_female_new_ranks_20260613.json"
+    },
+    {
+      "date": "2026-06-14",
+      "file": "data/fanqie_female_new_ranks_20260614.json"
+    },
+    {
+      "date": "2026-06-15",
+      "file": "data/fanqie_female_new_ranks_20260615.json"
+    }
   ]
 }

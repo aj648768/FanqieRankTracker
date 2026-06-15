@@ -301,6 +301,41 @@ input:focus-visible {
     font-weight: 650;
 }
 
+.board-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.board-btn {
+    min-height: 30px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.74rem;
+    font-weight: 760;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.board-btn:hover {
+    border-color: rgba(240, 79, 56, 0.28);
+    background: var(--accent-wash);
+    color: var(--accent-strong);
+    transform: translateY(-1px);
+}
+
+.board-btn.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-on);
+    box-shadow: 0 10px 20px rgba(240, 79, 56, 0.14);
+}
+
 .header-right {
     display: flex;
     align-items: center;
@@ -315,6 +350,7 @@ input:focus-visible {
 .date-picker-btn,
 .date-nav-btn,
 .mobile-menu-btn,
+.board-btn,
 .range-btn,
 .category-chip,
 .back-link,
@@ -1280,6 +1316,10 @@ input:focus-visible {
     gap: 10px;
 }
 
+.trend-board-tabs {
+    justify-content: flex-end;
+}
+
 .market-board,
 .trend-grid {
     display: grid;
@@ -1717,13 +1757,15 @@ input:focus-visible {
 
     .date-presets,
     .date-picker-wrap,
-    .trend-range {
+    .trend-range,
+    .board-tabs {
         width: 100%;
         min-width: 0;
     }
 
     .date-presets .preset-btn,
-    .trend-range .range-btn {
+    .trend-range .range-btn,
+    .board-tabs .board-btn {
         flex: 1;
         min-width: 0;
         padding-inline: 6px;
@@ -1734,7 +1776,8 @@ input:focus-visible {
         justify-content: center;
     }
 
-    .trend-range {
+    .trend-range,
+    .trend-board-tabs {
         grid-column: 1 / -1;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));

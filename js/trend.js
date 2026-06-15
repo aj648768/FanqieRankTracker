@@ -1,13 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const categoryButtons = document.getElementById('trend-category-buttons');
+    const boardTabs = document.getElementById('trend-board-tabs');
     const subtitle = document.getElementById('trend-subtitle');
     const rangeButtons = document.querySelectorAll('.range-btn');
     const cacheBuster = `v=${Math.floor(Date.now() / 600000)}`;
 
+    const legacyBoard = { key: 'female_new', name: '女频新书榜' };
+    const defaultBoardKey = 'female_new';
+
+    let boards = [];
     let categories = [];
     let trendRows = [];
     let latestData = null;
     let marketSummaryData = null;
+    let selectedBoardKey = defaultBoardKey;
     let selectedCategory = '';
     let selectedDays = 7;
 
@@ -19,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '年代民国', categories: ['年代', '民国言情'] },
         { name: '娱乐星光', categories: ['星光璀璨'] },
         { name: '游戏体育', categories: ['游戏体育'] },
+        { name: '男频幻想', categories: ['传统玄幻', '玄幻脑洞', '东方仙侠', '西方奇幻'] },
+        { name: '男频都市', categories: ['都市日常', '都市脑洞', '都市修真', '都市高武'] },
+        { name: '历史军事', categories: ['历史古代', '历史脑洞', '抗战谍战'] },
     ];
 
     const els = {
@@ -37,19 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function init() {
         try {
-            const [dateIndex, latestIndex, latestAll, marketSummary] = await Promise.all([
+            const [dateIndex, latestAll, marketSummary] = await Promise.all([
                 fetchJson(`data/dates.json?${cacheBuster}`),
-                fetchJson(`api/lastest.json?${cacheBuster}`).catch(() => null),
                 fetchJson(`api/lastest/all.json?${cacheBuster}`)
                     .catch(() => fetchJson(`data/latest_ranks.json?${cacheBuster}`)),
                 fetchJson(`data/market_summary.json?${cacheBuster}`).catch(() => null),
             ]);
-            latestData = latestAll;
-            marketSummaryData = marketSummary;
 
-            categories = latestIndex && latestIndex.types
-                ? latestIndex.types.filter(item => item.type !== 'all').map(item => item.type)
-                : await loadCategoriesFallback();
+            latestData = normalizeLatestData(latestAll);
+            marketSummaryData = marketSummary;
+            boards = latestData.boards;
+            selectedBoardKey = getInitialBoardKey();
+            refreshCategories();
 
             const dates = (dateIndex.dates || []).slice().sort();
             const trendDates = dates.slice(1);
@@ -58,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             trendRows = trendFiles
                 .filter(Boolean)
-                .map(item => ({ date: item.date, prevDate: item.prev_date, trends: item.trends || {} }))
+                .map(normalizeTrendRow)
                 .sort((a, b) => a.date.localeCompare(b.date));
 
             if (trendRows.length === 0 || categories.length === 0) {
@@ -67,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             selectedCategory = getInitialCategory();
+            renderBoardTabs();
             renderCategoryButtons();
             bindEvents();
             render();
@@ -76,16 +85,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadCategoriesFallback() {
-        const latest = await fetchJson(`data/latest_ranks.json?${cacheBuster}`);
-        return (latest.categories || []).map(cat => cat.name);
-    }
-
     function fetchJson(url) {
         return fetch(url).then(response => {
             if (!response.ok) throw new Error(`Failed to load ${url}`);
             return response.json();
         });
+    }
+
+    function normalizeLatestData(data) {
+        const normalizedBoards = Array.isArray(data.boards)
+            ? data.boards.map((board, index) => ({
+                key: board.key || `board_${index + 1}`,
+                name: board.name || board.key || `榜单 ${index + 1}`,
+                categories: board.categories || [],
+            }))
+            : [{
+                key: legacyBoard.key,
+                name: legacyBoard.name,
+                categories: data.categories || [],
+            }];
+        const defaultKey = data.default_board || getDefaultBoardKey(normalizedBoards);
+        return {
+            date: data.date,
+            prev_date: data.prev_date || '',
+            default_board: defaultKey,
+            boards: normalizedBoards,
+        };
+    }
+
+    function normalizeTrendRow(item) {
+        const rowBoards = item.boards || {
+            [legacyBoard.key]: {
+                name: legacyBoard.name,
+                trends: item.trends || {},
+            },
+        };
+        return {
+            date: item.date,
+            prevDate: item.prev_date,
+            defaultBoard: item.default_board || legacyBoard.key,
+            boards: rowBoards,
+            trends: item.trends || {},
+        };
+    }
+
+    function getDefaultBoardKey(boardList) {
+        return boardList.some(board => board.key === defaultBoardKey)
+            ? defaultBoardKey
+            : (boardList[0] ? boardList[0].key : defaultBoardKey);
+    }
+
+    function getSelectedBoard() {
+        return boards.find(board => board.key === selectedBoardKey) || boards[0] || {
+            key: legacyBoard.key,
+            name: legacyBoard.name,
+            categories: [],
+        };
+    }
+
+    function refreshCategories() {
+        categories = getSelectedBoard().categories.map(cat => cat.name);
     }
 
     function bindEvents() {
@@ -99,10 +158,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function getInitialBoardKey() {
+        const params = new URLSearchParams(window.location.search);
+        const board = params.get('board');
+        if (boards.some(item => item.key === board)) return board;
+        return latestData.default_board || getDefaultBoardKey(boards);
+    }
+
     function getInitialCategory() {
         const params = new URLSearchParams(window.location.search);
         const type = params.get('type');
         return categories.includes(type) ? type : categories[0];
+    }
+
+    function renderBoardTabs() {
+        if (!boardTabs) return;
+        boardTabs.innerHTML = boards.map(board => `
+            <button class="board-btn${board.key === selectedBoardKey ? ' active' : ''}" type="button" data-board="${escapeAttr(board.key)}">
+                ${escapeHtml(board.name)}
+            </button>
+        `).join('');
+
+        boardTabs.querySelectorAll('.board-btn').forEach(btn => {
+            btn.addEventListener('click', () => selectBoard(btn.dataset.board));
+        });
+    }
+
+    function selectBoard(boardKey) {
+        if (!boards.some(board => board.key === boardKey)) return;
+        selectedBoardKey = boardKey;
+        refreshCategories();
+        selectedCategory = categories.includes(selectedCategory) ? selectedCategory : categories[0];
+        const url = new URL(window.location.href);
+        url.searchParams.set('board', selectedBoardKey);
+        url.searchParams.set('type', selectedCategory);
+        history.replaceState(null, '', url);
+        renderBoardTabs();
+        renderCategoryButtons();
+        render();
     }
 
     function renderCategoryButtons() {
@@ -121,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!categories.includes(type)) return;
         selectedCategory = type;
         const url = new URL(window.location.href);
+        url.searchParams.set('board', selectedBoardKey);
         url.searchParams.set('type', selectedCategory);
         history.replaceState(null, '', url);
         renderCategoryButtons();
@@ -128,20 +222,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function render() {
+        const selectedBoard = getSelectedBoard();
         const rows = getWindowRows()
             .map(row => ({
                 date: row.date,
                 prevDate: row.prevDate,
-                trend: row.trends[selectedCategory] || null,
+                trend: getTrendMap(row)[selectedCategory] || null,
             }))
             .filter(row => row.trend);
 
         if (rows.length === 0) {
-            renderEmpty(`${selectedCategory} 暂无趋势数据。`);
+            renderEmpty(`${selectedBoard.name} / ${selectedCategory} 暂无趋势数据。`);
             return;
         }
 
-        subtitle.textContent = `${selectedCategory} · ${rows[0].date} 至 ${rows[rows.length - 1].date} · ${rows.length} 个观察日`;
+        subtitle.textContent = `${selectedBoard.name} · ${selectedCategory} · ${rows[0].date} 至 ${rows[rows.length - 1].date} · ${rows.length} 个观察日`;
 
         renderMarketBoard(getWindowRows());
         renderList(els.reads, collectReads(rows));
@@ -153,6 +248,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function getWindowRows() {
         if (selectedDays === 'all') return trendRows;
         return trendRows.slice(-selectedDays);
+    }
+
+    function getTrendMap(row) {
+        if (row.boards && row.boards[selectedBoardKey]) {
+            return row.boards[selectedBoardKey].trends || {};
+        }
+        if (selectedBoardKey === legacyBoard.key) return row.trends || {};
+        return {};
     }
 
     function summarizeRows(rows) {
@@ -200,14 +303,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `AI 总结 · ${summaryData.period || period}`
             : `规则统计 · ${period}`;
 
-        els.hotGenres.innerHTML = hotGenres.slice(0, 5).map((item, index) => `
-            <div class="hot-type-row hot-type-row-static genre-row">
-                <span>${index + 1}</span>
-                <strong>${escapeHtml(item.name)}</strong>
-                <small>${escapeHtml(item.categoryText)} · 新增在读 ${formatReads(item.readGrowthTotal)} · 增长作品 ${item.readCount}</small>
-                <em>${formatReads(item.readGrowthTotal)}</em>
-            </div>
-        `).join('');
+        els.hotGenres.innerHTML = hotGenres.length
+            ? hotGenres.slice(0, 5).map((item, index) => `
+                <div class="hot-type-row hot-type-row-static genre-row">
+                    <span>${index + 1}</span>
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <small>${escapeHtml(item.categoryText)} · 新增在读 ${formatReads(item.readGrowthTotal)} · 增长作品 ${item.readCount}</small>
+                    <em>${formatReads(item.readGrowthTotal)}</em>
+                </div>
+            `).join('')
+            : '<p class="muted-line">暂无综合赛道数据。</p>';
 
         els.hotTypes.innerHTML = hotTypes.slice(0, 6).map((item, index) => `
             <button class="hot-type-row" type="button" data-type="${escapeAttr(item.name)}">
@@ -219,16 +324,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
 
         els.hotTypes.querySelectorAll('.hot-type-row').forEach(btn => {
-            btn.addEventListener('click', () => {
-                selectCategory(btn.dataset.type);
-            });
+            btn.addEventListener('click', () => selectCategory(btn.dataset.type));
         });
 
-        els.hotThemes.innerHTML = hotThemes.slice(0, 14).map(item => `
-            <span class="theme-chip" title="新书 ${item.count} 本，覆盖 ${item.categories.size} 个类型">
-                ${escapeHtml(item.name)} <small>${item.count}</small>
-            </span>
-        `).join('');
+        els.hotThemes.innerHTML = hotThemes.length
+            ? hotThemes.slice(0, 14).map(item => `
+                <span class="theme-chip" title="新书 ${item.count} 本，覆盖 ${item.categories.size} 个类型">
+                    ${escapeHtml(item.name)} <small>${item.count}</small>
+                </span>
+            `).join('')
+            : '<p class="muted-line">暂无高频题材数据。</p>';
     }
 
     function collectHotGenres(rowsWindow) {
@@ -269,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function collectHotTypes(rowsWindow) {
         return categories.map(name => {
             const rows = rowsWindow
-                .map(row => ({ trend: row.trends[name] || null }))
+                .map(row => ({ trend: getTrendMap(row)[name] || null }))
                 .filter(row => row.trend);
             const totals = summarizeRows(rows);
             return {
@@ -293,15 +398,15 @@ document.addEventListener('DOMContentLoaded', () => {
             '年代', '七零', '八零', '军婚', '豪门', '总裁', '真假千金', '先婚后爱', '追妻',
             '甜宠', '双洁', '强制爱', '无CP', '末世', '废土', '天灾', '囤货', '异能',
             '国运', '星际', '修仙', '玄学', '无限流', '悬疑', '直播', '综艺', '娱乐圈',
-            '校园', '暗恋', '青梅竹马', '民国', '兽世', '远古', '基建'
+            '校园', '暗恋', '青梅竹马', '民国', '兽世', '远古', '基建', '都市', '玄幻',
+            '仙侠', '高武', '战神', '赘婿', '历史', '谍战', '抗战', '动漫', '衍生'
         ];
         const scoreMap = new Map(keywords.map(name => [name, { name, count: 0, categories: new Set() }]));
-
         const latestBookMap = buildLatestBookMap();
 
         rowsWindow.forEach(row => {
             categories.forEach(catName => {
-                const trend = row.trends[catName];
+                const trend = getTrendMap(row)[catName];
                 if (!trend) return;
                 (trend.new_books || []).forEach(title => {
                     const book = latestBookMap.get(title) || {};
@@ -317,18 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildLatestBookMap() {
         const bookMap = new Map();
-        const latestCategories = latestData && latestData.categories ? latestData.categories : [];
+        const latestCategories = getSelectedBoard().categories || [];
         latestCategories.forEach(cat => {
             (cat.books || []).forEach(book => {
                 if (book.title) bookMap.set(book.title, book);
             });
         });
         return bookMap;
-    }
-
-    function extractBookId(url) {
-        const match = String(url || '').match(/\/page\/(\d+)/);
-        return match ? match[1] : '';
     }
 
     function addThemeHits(scoreMap, keywords, text, categoryName, weight) {
@@ -391,23 +491,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const latestBookMap = buildLatestBookMap();
-
         container.innerHTML = items.map(item => {
             const book = latestBookMap.get(item.title) || {};
             const bookId = extractBookId(book.url);
             const detailUrl = bookId
-                ? `book.html?id=${encodeURIComponent(bookId)}`
-                : `book.html?title=${encodeURIComponent(item.title)}`;
+                ? `book.html?id=${encodeURIComponent(bookId)}&board=${encodeURIComponent(selectedBoardKey)}`
+                : `book.html?title=${encodeURIComponent(item.title)}&board=${encodeURIComponent(selectedBoardKey)}`;
 
             return `
-            <a class="compact-row compact-row-link" href="${detailUrl}" target="_blank" rel="noopener noreferrer">
-                <div>
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <small>${escapeHtml(item.meta)}</small>
-                </div>
-                <span>${escapeHtml(item.value)}</span>
-            </a>
-        `;
+                <a class="compact-row compact-row-link" href="${detailUrl}" target="_blank" rel="noopener noreferrer">
+                    <div>
+                        <strong>${escapeHtml(item.title)}</strong>
+                        <small>${escapeHtml(item.meta)}</small>
+                    </div>
+                    <span>${escapeHtml(item.value)}</span>
+                </a>
+            `;
         }).join('');
     }
 
@@ -448,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getMarketSummaryForPeriod() {
+        if (selectedBoardKey !== latestData.default_board) return null;
         if (!marketSummaryData || !marketSummaryData.periods) return null;
         const key = selectedDays === 'all' ? 'all' : String(selectedDays);
         const item = marketSummaryData.periods[key];
@@ -465,6 +565,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatReads(value) {
         if (value >= 10000) return `+${(value / 10000).toFixed(1)}万`;
         return `+${Math.round(value)}`;
+    }
+
+    function extractBookId(url) {
+        const match = String(url || '').match(/\/page\/(\d+)/);
+        return match ? match[1] : '';
     }
 
     function renderMarkdown(text) {

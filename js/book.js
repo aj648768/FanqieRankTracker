@@ -2,11 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const detail = document.getElementById('book-detail');
     const cacheBuster = `v=${Math.floor(Date.now() / 600000)}`;
     const maxDays = 30;
+    const legacyBoard = { key: 'female_new', name: '女频新书榜' };
     const copyToast = document.createElement('div');
     copyToast.className = 'copy-toast';
     copyToast.textContent = '书本信息已复制';
     document.body.appendChild(copyToast);
     let toastTimer = null;
+    let snapshotFilesByDate = {};
 
     init();
 
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const bookId = params.get('id');
         const bookTitle = params.get('title');
+        const boardKey = params.get('board');
         if (!bookId && !bookTitle) {
             renderEmpty('缺少作品 ID。');
             return;
@@ -21,11 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const dateIndex = await fetchJson(`data/dates.json?${cacheBuster}`);
+            snapshotFilesByDate = buildSnapshotFileMap(dateIndex);
             const dates = (dateIndex.dates || []).slice().sort().slice(-maxDays);
             const snapshots = await Promise.all(
-                dates.map(date => fetchJson(`${snapshotUrl(date)}?${cacheBuster}`).catch(() => null))
+                dates.map(date => fetchSnapshot(date).catch(() => null))
             );
-            const records = collectBookRecords(bookId, bookTitle, dates, snapshots);
+            const records = collectBookRecords(bookId, bookTitle, boardKey, dates, snapshots);
 
             if (!records.length) {
                 renderEmpty('最近 30 天榜单中没有找到这本书。');
@@ -39,8 +43,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function snapshotUrl(date) {
-        return `data/fanqie_female_new_ranks_${date.replace(/-/g, '')}.json`;
+    function fetchSnapshot(date) {
+        const indexedFile = snapshotFilesByDate[date];
+        if (indexedFile) {
+            return fetchJson(`${indexedFile}?${cacheBuster}`);
+        }
+        const compact = date.replace(/-/g, '');
+        return fetchJson(`data/fanqie_ranks_${compact}.json?${cacheBuster}`)
+            .catch(() => fetchJson(`data/fanqie_female_new_ranks_${compact}.json?${cacheBuster}`));
+    }
+
+    function buildSnapshotFileMap(index) {
+        const map = {};
+        (index.snapshots || []).forEach(item => {
+            if (item.date && item.file) map[item.date] = item.file;
+        });
+        return map;
     }
 
     function fetchJson(url) {
@@ -50,27 +68,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function collectBookRecords(bookId, bookTitle, dates, snapshots) {
+    function normalizeSnapshot(snapshot) {
+        if (snapshot && Array.isArray(snapshot.boards)) return snapshot;
+        return {
+            date: snapshot ? snapshot.date : '',
+            boards: [{
+                key: legacyBoard.key,
+                name: legacyBoard.name,
+                categories: snapshot && snapshot.categories ? snapshot.categories : [],
+            }],
+        };
+    }
+
+    function collectBookRecords(bookId, bookTitle, boardKey, dates, snapshots) {
         const records = [];
         snapshots.forEach((snapshot, snapshotIndex) => {
-            if (!snapshot || !snapshot.categories) return;
+            if (!snapshot) return;
+            const normalized = normalizeSnapshot(snapshot);
             const date = dates[snapshotIndex];
-            snapshot.categories.forEach(cat => {
-                (cat.books || []).forEach((book, index) => {
-                    if (bookId && extractBookId(book.url) !== bookId) return;
-                    if (!bookId && book.title !== bookTitle) return;
-                    records.push({
-                        date,
-                        category: cat.name,
-                        rank: index + 1,
-                        readsLabel: book.reads || '未知',
-                        readsValue: parseReads(book.reads),
-                        book,
+            normalized.boards.forEach(board => {
+                (board.categories || []).forEach(cat => {
+                    (cat.books || []).forEach((book, index) => {
+                        if (bookId && extractBookId(book.url) !== bookId) return;
+                        if (!bookId && book.title !== bookTitle) return;
+                        records.push({
+                            date,
+                            boardKey: board.key,
+                            boardName: board.name,
+                            category: cat.name,
+                            rank: index + 1,
+                            readsLabel: book.reads || '未知',
+                            readsValue: parseReads(book.reads),
+                            book,
+                        });
                     });
                 });
             });
         });
-        return records.sort((a, b) => a.date.localeCompare(b.date));
+        return records.sort((a, b) => {
+            const dateOrder = a.date.localeCompare(b.date);
+            if (dateOrder !== 0) return dateOrder;
+            if (boardKey) {
+                if (a.boardKey === boardKey && b.boardKey !== boardKey) return 1;
+                if (a.boardKey !== boardKey && b.boardKey === boardKey) return -1;
+            }
+            return a.boardName.localeCompare(b.boardName) || a.rank - b.rank;
+        });
     }
 
     function renderBook(records) {
@@ -85,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${book.cover ? `<img src="${book.cover}" alt="${escapeAttr(book.title)}">` : '<div class="no-cover">暂无封面</div>'}
                 </div>
                 <div class="detail-main">
-                    <span class="panel-kicker">${escapeHtml(latest.category)} · 第 ${latest.rank} 名</span>
+                    <span class="panel-kicker">${escapeHtml(latest.boardName)} · ${escapeHtml(latest.category)} · 第 ${latest.rank} 名</span>
                     <h1>${escapeHtml(book.title)}</h1>
                     <p class="detail-author">作者：${escapeHtml(book.author || '未知')}</p>
                     <div class="detail-stats">
@@ -298,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `
             <div class="book-history-row">
                 <time>${escapeHtml(record.date)}</time>
-                <strong>${escapeHtml(record.category)} · 第 ${record.rank} 名</strong>
+                <strong>${escapeHtml(record.boardName)} · ${escapeHtml(record.category)} · 第 ${record.rank} 名</strong>
                 <span>${escapeHtml(record.readsLabel)}</span>
             </div>
         `;

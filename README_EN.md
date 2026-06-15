@@ -2,7 +2,7 @@
 
 [![中文](https://img.shields.io/badge/lang-中文-red)](README.md)
 
-> 👗 Focused exclusively on **Fanqie Novel's Female Category (女频)**, featuring daily automated tracking of new book rankings and AI-powered trend analysis, deployed as a premium online dashboard.
+> 📚 Tracks Fanqie's **male/female reading and new-book rankings**, with daily automated scraping across four boards and AI-powered trend analysis.
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🕷️ Auto Scraping | Daily automated scraping of Top 30 new books across all sub-categories within Fanqie's Female section |
+| 🕷️ Auto Scraping | Daily automated scraping of Top 30 books across Fanqie's male/female reading and new-book boards |
 | 📊 Trend Analysis | Automatic day-over-day comparison: new entries / dropped / rank changes / readership growth |
 | 🤖 AI Summary | OpenAI-compatible API integration for per-category market trend analysis |
 | 🖥️ Dashboard | Dark editorial-style dashboard with typewriter animation and waterfall book cards |
