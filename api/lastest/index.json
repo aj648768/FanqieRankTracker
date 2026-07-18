@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-17",
-  "prev_date": "2026-07-15",
+  "date": "2026-07-18",
+  "prev_date": "2026-07-17",
   "default_board": "female_new",
   "boards": [
     {
@@ -13,13 +13,13 @@
       "key": "female_read",
       "name": "女频阅读榜",
       "category_count": 18,
-      "book_count": 358
+      "book_count": 359
     },
     {
       "key": "male_new",
       "name": "男频新书榜",
       "category_count": 19,
-      "book_count": 377
+      "book_count": 378
     },
     {
       "key": "male_read",
@@ -34,7 +34,7 @@
       "url": "api/lastest/all.json",
       "board_count": 4,
       "category_count": 18,
-      "book_count": 1472
+      "book_count": 1474
     },
     {
       "type": "女频新书榜",
@@ -48,14 +48,14 @@
       "board_key": "female_read",
       "url": "api/lastest/female_read.json",
       "category_count": 18,
-      "book_count": 358
+      "book_count": 359
     },
     {
       "type": "男频新书榜",
       "board_key": "male_new",
       "url": "api/lastest/male_new.json",
       "category_count": 19,
-      "book_count": 377
+      "book_count": 378
     },
     {
       "type": "男频阅读榜",
